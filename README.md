@@ -12,3 +12,8 @@ Public Health through Coursera.  Information about this course can be obtained
 This code should not be viewed by other students in this Coursera class until 
 after the deadline has passed. The code is being peer reviewed by other students 
 also required to write their own code.
+
+## Presentation
+
+[Click here](https://brainvat.github.io/DDPShinyApp/) to access the pitch deck
+associated with this repository.
