@@ -18,7 +18,7 @@ shinyUI(fluidPage(
       sliderInput("stream",
                   "Stream:",
                   min = 1,
-                  max = 10,
+                  max = 4,
                   value = 3)
     ),
 
