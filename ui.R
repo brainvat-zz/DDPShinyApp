@@ -10,21 +10,28 @@ library(shiny)
 shinyUI(fluidPage(
 
   # Application title
-  titlePanel("Change Point Detection in Time Series"),
-
-  # Sidebar with a slider input for number of bins
-  sidebarLayout(
-    sidebarPanel(
-      sliderInput("stream",
-                  "Stream:",
-                  min = 1,
-                  max = 4,
-                  value = 3)
+  titlePanel("Predicting Stock Prices with Change Point Detection"),
+  
+  includeHTML("intro.html"),
+  
+  fluidRow(
+    column(4, 
+          selectInput("stream", label = h3("1. Choose stock pairs"), 
+                      choices = my.labels),
+          tableOutput("streamHelp"),
+          selectInput("method", label = h3("2. Choose change point algorithm"),
+                      choices = cpm.methods)
     ),
 
-    # Show a plot of the generated distribution
-    mainPanel(
-      plotOutput("linePlot")
+    column(8,
+          plotOutput("linePlot")
     )
-  )
+  ),
+  
+  h3("3. Explore change points detected"),
+  helpText("Can you find an algorithm where you could discovered stock price changes early enough 
+           in one company to have made a profit by buying stock in its pair? daysDelta is the number
+           of days between when the algorithm was able to detect the change and when the actual
+           change occurred in the market."),  
+  dataTableOutput("cpmTable")
 ))

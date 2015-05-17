@@ -15,8 +15,24 @@ library("ape")
 library("sqldf")
 library("gridExtra")
 
+# interesting stocks
 data <- cbind(c("ADI", "DISCA", "PCAR", "PAYX", "CA", "BBBY", "FOX", "EBAY"))
-for (i in 1:nrow(data)) getSymbols(as.character(data[i,1]))
+data.labels<- c("Analog Devices Inc. makes semiconductors",
+                "Discovery Communications Inc. is a mass media company",
+                "PACCAR Inc. manufactures trucks",
+                "Paychex Inc. provides HR outsourcing",
+                "CA Inc. creates software",
+                "Bed Bath & Beyond Inc. sells goods for home",
+                "Twenty-First Century Fox Inc. is a mass media company",
+                "EBAY Inc. does online auctions")
+
+# load stocks from quantmod cache if available
+if (file.exists("data/quantmod-cache.RData")) {
+  load("data/quantmod-cache.RData")
+  if (!(sum(sapply(data, exists)) == length(data))) {
+    for (i in 1:nrow(data)) getSymbols(as.character(data[i,1]))    
+  }
+}
 results=t(apply(combn(sort(as.character(data[,1]), decreasing = TRUE), 2), 2,
                 function(x) {
                   ts1=drop(Cl(eval(parse(text=x[1]))))
@@ -27,7 +43,9 @@ results=t(apply(combn(sort(as.character(data[,1]), decreasing = TRUE), 2), 2,
                   beta=coef(m)[1]
                   sprd=t$ts1 - beta*t$ts2
                   ht=adf.test(sprd, alternative="stationary", k=0)$p.value
-                  c(symbol1=x[1], symbol2=x[2], (1-ht))}))
+                  c(symbol1=x[1], symbol2=x[2], (1-ht))
+                })
+          )
 results=as.data.frame(results)
 colnames(results)=c("Sym1", "Sym2", "TSdist")
 results$TSdist=as.numeric(as.character(results$TSdist))
@@ -70,4 +88,6 @@ my.pairs <- list(c("ADI", "DISCA"),
                  c("PCAR", "PAYX"),
                  c("CA", "BBBY"),
                  c("FOX", "EBAY"))
+
+my.labels <- sapply(X = my.pairs, FUN = function(x) { paste(x, collapse = " vs ") })
 
