@@ -1,6 +1,6 @@
 ---
-title       : Developing Data Products
-subtitle    : Pitch
+title       : Predicting Stock Prices with Change Point Detection
+subtitle    : Using the CPM package
 author      : Allen Hammock
 job         : devdataprod-014
 framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
@@ -11,28 +11,82 @@ mode        : selfcontained # {standalone, draft}
 knit        : slidify::knit2slides
 ---
 
-## Read-And-Delete
+## The Premise
 
-1. Edit YAML front matter
-2. Write using R Markdown
-3. Use an empty line followed by three dashes to separate slides!
+![The Author](https://avatars1.githubusercontent.com/u/543?v=3&s=230)
 
---- .class #id 
+1. [Some have observed](http://www.researchgate.net/publication/224385407_A_Data_mining_algorithm_to_analyse_stock_market_data_using_lagged_correlation), we may be able to make short term
+capital gains when two stocks traded on the market are strongly correlated together.
 
-## Slide 2
+2. [One method](https://aschinchon.wordpress.com/2015/05/08/odd-connections-inside-the-nasdaq-100/) to
+detect that two stocks appear to be **cointegrated** is to use the Augmented Dickey-Fuller test.
 
-Test to make sure R code executes.  Note, `slidify()` version 0.4.5 is not
-working with the `stringr` package version 0.9.0.9000.  See 
-[discussion on github](https://github.com/ramnathv/slidify/issues/407) for
-details.  
+3. Perhaps we could explore various methods of [change point detection](http://things-about-r.tumblr.com/post/106806522699/change-point-detection-in-time-series-with-r-and)
+with a Shiny app to see if significant changes in one stock might predict similar
+changes in another stock?
 
-Downgrading `stringr` to version 0.6.2 solves the problem for now.
+
+--- 
+
+## Detecting Change Points with CPM
 
 
 ```r
-sessionInfo()$R.version$version.string
+set.seed(8675309)
+library(cpm)
+df <- data.frame(t = seq(as.Date("2013-01-01"), as.Date("2013-01-01")+399, by="1 day"),
+                 y = c(rnorm(200,0,1), rnorm(200,3,1)))
+res <- detectChangePoint(df$y, cpmType = "Student", ARL0 = 500, startup = 20)
+ggplot(df, aes(t, y)) + geom_line() +
+  geom_vline(xintercept = as.numeric(df[res$detectionTime, c("t")]), col = 'blue') +
+  geom_vline(xintercept = as.numeric(df[res$changePoint, c("t")]), col = 'red')
+```
+
+![plot of chunk unnamed-chunk-1](assets/fig/unnamed-chunk-1-1.png) 
+
+--- 
+
+## Tracking Stock Market Changes with quantmod
+
+
+```r
+library(quantmod)
+getSymbols("YHOO",src="google")
 ```
 
 ```
-## [1] "R version 3.1.3 (2015-03-09)"
+## [1] "YHOO"
 ```
+
+```r
+candleChart(YHOO,multi.col=TRUE,theme="white")
+```
+
+![plot of chunk unnamed-chunk-2](assets/fig/unnamed-chunk-2-1.png) 
+
+--- 
+
+## Experiment with Change Point Detection on Shiny!
+
+<!-- Limit image width and height -->
+<style type='text/css'>
+#slide-4 img {
+    float: right;
+    width: 50%;
+    padding-left: 20px;
+}
+</style>
+
+![plot of chunk unnamed-chunk-3](assets/fig/unnamed-chunk-3-1.png) 
+**Try it out yourself**
+* [shinyapps.io](https://brainvat.shinyapps.io/DDPShinyPitch/)
+* [github.com](https://github.com/brainvat/DDPShinyApp/tree/master)
+
+**References**
+* [Detecting change points in R and Tableau by Roberto Rösler][ref1]
+* [Strange connections between stocks in NASDAQ by Antonio S. Chinchón][ref2]
+* [Quantmod examples][ref3]
+
+[ref1]: http://things-about-r.tumblr.com/post/106806522699/change-point-detection-in-time-series-with-r-and  "Change Point Detection in Time Series with R and Tableau"
+[ref2]: https://aschinchon.wordpress.com/2015/05/08/odd-connections-inside-the-nasdaq-100/ "Odd Connections Inside The NASDAQ-100"
+[ref3]: http://www.quantmod.com/examples/intro/ "Quantitative Financial Modelling & Trading Framework for R"

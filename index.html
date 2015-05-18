@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Developing Data Products</title>
+  <title>Predicting Stock Prices with Change Point Detection</title>
   <meta charset="utf-8">
-  <meta name="description" content="Developing Data Products">
+  <meta name="description" content="Predicting Stock Prices with Change Point Detection">
   <meta name="author" content="Allen Hammock">
   <meta name="generator" content="slidify" />
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,8 +32,8 @@
     <!-- LOGO SLIDE -->
         <slide class="title-slide segue nobackground">
   <hgroup class="auto-fadein">
-    <h1>Developing Data Products</h1>
-    <h2>Pitch</h2>
+    <h1>Predicting Stock Prices with Change Point Detection</h1>
+    <h2>Using the CPM package</h2>
     <p>Allen Hammock<br/>devdataprod-014</p>
   </hgroup>
   <article></article>  
@@ -43,36 +43,97 @@
     <!-- SLIDES -->
     <slide class="" id="slide-1" style="background:;">
   <hgroup>
-    <h2>Read-And-Delete</h2>
+    <h2>The Premise</h2>
   </hgroup>
   <article data-timings="">
-    <ol>
-<li>Edit YAML front matter</li>
-<li>Write using R Markdown</li>
-<li>Use an empty line followed by three dashes to separate slides!</li>
+    <p><img src="https://avatars1.githubusercontent.com/u/543?v=3&amp;s=230" alt="The Author"></p>
+
+<ol>
+<li><p><a href="http://www.researchgate.net/publication/224385407_A_Data_mining_algorithm_to_analyse_stock_market_data_using_lagged_correlation">Some have observed</a>, we may be able to make short term
+capital gains when two stocks traded on the market are strongly correlated together.</p></li>
+<li><p><a href="https://aschinchon.wordpress.com/2015/05/08/odd-connections-inside-the-nasdaq-100/">One method</a> to
+detect that two stocks appear to be <strong>cointegrated</strong> is to use the Augmented Dickey-Fuller test.</p></li>
+<li><p>Perhaps we could explore various methods of <a href="http://things-about-r.tumblr.com/post/106806522699/change-point-detection-in-time-series-with-r-and">change point detection</a>
+with a Shiny app to see if significant changes in one stock might predict similar
+changes in another stock?</p></li>
 </ol>
 
   </article>
   <!-- Presenter Notes -->
 </slide>
 
-<slide class="class" id="id" style="background:;">
+<slide class="" id="slide-2" style="background:;">
   <hgroup>
-    <h2>Slide 2</h2>
+    <h2>Detecting Change Points with CPM</h2>
   </hgroup>
   <article data-timings="">
-    <p>Test to make sure R code executes.  Note, <code>slidify()</code> version 0.4.5 is not
-working with the <code>stringr</code> package version 0.9.0.9000.  See 
-<a href="https://github.com/ramnathv/slidify/issues/407">discussion on github</a> for
-details.  </p>
-
-<p>Downgrading <code>stringr</code> to version 0.6.2 solves the problem for now.</p>
-
-<pre><code class="r">sessionInfo()$R.version$version.string
+    <pre><code class="r">set.seed(8675309)
+library(cpm)
+df &lt;- data.frame(t = seq(as.Date(&quot;2013-01-01&quot;), as.Date(&quot;2013-01-01&quot;)+399, by=&quot;1 day&quot;),
+                 y = c(rnorm(200,0,1), rnorm(200,3,1)))
+res &lt;- detectChangePoint(df$y, cpmType = &quot;Student&quot;, ARL0 = 500, startup = 20)
+ggplot(df, aes(t, y)) + geom_line() +
+  geom_vline(xintercept = as.numeric(df[res$detectionTime, c(&quot;t&quot;)]), col = &#39;blue&#39;) +
+  geom_vline(xintercept = as.numeric(df[res$changePoint, c(&quot;t&quot;)]), col = &#39;red&#39;)
 </code></pre>
 
-<pre><code>## [1] &quot;R version 3.1.3 (2015-03-09)&quot;
+<p><img src="assets/fig/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1"> </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Tracking Stock Market Changes with quantmod</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">library(quantmod)
+getSymbols(&quot;YHOO&quot;,src=&quot;google&quot;)
 </code></pre>
+
+<pre><code>## [1] &quot;YHOO&quot;
+</code></pre>
+
+<pre><code class="r">candleChart(YHOO,multi.col=TRUE,theme=&quot;white&quot;)
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-2-1.png" alt="plot of chunk unnamed-chunk-2"> </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Experiment with Change Point Detection on Shiny!</h2>
+  </hgroup>
+  <article data-timings="">
+    <!-- Limit image width and height -->
+
+<style type='text/css'>
+#slide-4 img {
+    float: right;
+    width: 50%;
+    padding-left: 20px;
+}
+</style>
+
+<p><img src="assets/fig/unnamed-chunk-3-1.png" alt="plot of chunk unnamed-chunk-3"> 
+<strong>Try it out yourself</strong></p>
+
+<ul>
+<li><a href="https://brainvat.shinyapps.io/DDPShinyPitch/">shinyapps.io</a></li>
+<li><a href="https://github.com/brainvat/DDPShinyApp/tree/master">github.com</a></li>
+</ul>
+
+<p><strong>References</strong></p>
+
+<ul>
+<li><a href="http://things-about-r.tumblr.com/post/106806522699/change-point-detection-in-time-series-with-r-and" title="Change Point Detection in Time Series with R and Tableau">Detecting change points in R and Tableau by Roberto Rösler</a></li>
+<li><a href="https://aschinchon.wordpress.com/2015/05/08/odd-connections-inside-the-nasdaq-100/" title="Odd Connections Inside The NASDAQ-100">Strange connections between stocks in NASDAQ by Antonio S. Chinchón</a></li>
+<li><a href="http://www.quantmod.com/examples/intro/" title="Quantitative Financial Modelling &amp; Trading Framework for R">Quantmod examples</a></li>
+</ul>
 
   </article>
   <!-- Presenter Notes -->
@@ -84,14 +145,26 @@ details.  </p>
     <ul>
       <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=1 title='Read-And-Delete'>
+        data-slide=1 title='The Premise'>
          1
       </a>
     </li>
     <li>
       <a href="#" target="_self" rel='tooltip' 
-        data-slide=2 title='Slide 2'>
+        data-slide=2 title='Detecting Change Points with CPM'>
          2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Tracking Stock Market Changes with quantmod'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Experiment with Change Point Detection on Shiny!'>
+         4
       </a>
     </li>
   </ul>
