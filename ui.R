@@ -29,8 +29,7 @@ shinyUI(fluidPage(
   ),
   
   h3("3. Explore change points detected"),
-  helpText("Can you find an algorithm where you could discovered stock price changes early enough 
-           in one company to have made a profit by buying stock in its pair? daysDelta is the number
+  helpText("daysDelta is the number
            of days between when the algorithm was able to detect the change and when the actual
            change occurred in the market."),  
   dataTableOutput("cpmTable")
